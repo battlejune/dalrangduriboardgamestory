@@ -194,11 +194,13 @@ def calculate_total_top_play_game(boardgame_dict):
     return top_play_boardgame_name, top_play_count
 
 #---------------------------------------------------------------------------
-#st.title('달랑두리의 보드게임 이야기')
+st.title('달랑두리의 보드게임 이야기')
+# 여백
+st.markdown("<h3></h3>", unsafe_allow_html=True)
 
 #---------------------------------------------------------------------------
 # 종합
-container = st.container(border=True)
+#container = st.container(border=True)
 
 st.session_state.boardgame_dic = parse_csvfile()         
 # 'play_count' 값을 기준으로 내림차순으로 key 정렬
@@ -209,37 +211,37 @@ top_play_boardgame_name, top_play_count = calculate_total_top_play_game(st.sessi
 str_winner_users, winner_count = calculate_total_top_winner(st.session_state.boardgame_dic)
 
 # 제목
-container.subheader("종합")
+#st.subheader("종합")
 # 구분선 추가
-container.markdown("<hr style='border: 2px solid rgba(0, 0, 230, 1.0); margin-top: 2px; margin-bottom: 60px;'>", unsafe_allow_html=True)
+#st.markdown("<hr style='border: 2px solid rgba(0, 0, 230, 1.0); margin-top: 2px; margin-bottom: 60px;'>", unsafe_allow_html=True)
 
 # 인기 게임
-container.markdown(f"<h6 style='color:gray;'>인기 게임</h6>", unsafe_allow_html=True)
+st.markdown(f"<h6 style='color:gray;'>인기 게임</h6>", unsafe_allow_html=True)
 # 구분선 추가
-container.markdown("<hr style='border: 0.5px solid rgba(210, 210, 210, 0.5); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
+st.markdown("<hr style='border: 0.5px solid rgba(210, 210, 210, 0.5); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
 
 # URL로 직접 이미지 표시
 icon_url = st.session_state.boardgame_dic[top_play_boardgame_name]["icon_url"]
 resized_img = load_and_resize_image(icon_url)
-container.image(resized_img)
-header = container.columns([1, 0.6])
+st.image(resized_img)
+header = st.columns([1, 0.6])
 # 보드게임 이름
 header[0].markdown(f"<h1 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{top_play_boardgame_name}</h1>", unsafe_allow_html=True)
 header[1].markdown(f"<h2 style='color:rgba(210, 210, 210, 1.0); border: 2px; margin-top: 5px; margin-bottom: 0px;'>{top_play_count} 회</h2>", unsafe_allow_html=True)
 
-# 여백ß
-container.markdown("<h4></h4>", unsafe_allow_html=True)
+# 여백
+st.markdown("<h4></h4>", unsafe_allow_html=True)
 
 # 최다 1등
-container.markdown(f"<h6 style='color:gray;'>챔피언</h6>", unsafe_allow_html=True)
+st.markdown(f"<h6 style='color:gray;'>챔피언</h6>", unsafe_allow_html=True)
 # 구분선 추가
-container.markdown("<hr style='border: 0.5px solid rgba(210, 210, 210, 0.5); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
-header = container.columns([1, 0.6])
+st.markdown("<hr style='border: 0.5px solid rgba(210, 210, 210, 0.5); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
+header = st.columns([1, 0.6])
 header[0].markdown(f"<h1 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{str_winner_users}</h1>", unsafe_allow_html=True)
 header[1].markdown(f"<h2 style='color:rgba(210, 210, 210, 1.0); border: 2px; margin-top: 5px; margin-bottom: 0px;'>{winner_count} 회</h2>", unsafe_allow_html=True)
 
 # 여백
-container.markdown("<h5></h5>", unsafe_allow_html=True)
+st.markdown("<h5></h5>", unsafe_allow_html=True)
 
 # 우승 횟수 막대 그래프
 total_winner_count = calculate_total_winner_count(st.session_state.boardgame_dic)
@@ -250,9 +252,9 @@ data = pd.DataFrame({' ':str_family_name_list, '우승 횟수':total_winner_coun
 # x 값에 따라 색상 지정
 chart = alt.Chart(data).mark_bar().encode(x=alt.X('우승 횟수', axis=alt.Axis(format='d')), y=alt.Y(' ', sort=None), color=' :N'  )
 # 막대 차트 : st.bar_chart()
-#container.bar_chart(chart, x=" ", y="우승 횟수", horizontal=True)
+#st.bar_chart(chart, x=" ", y="우승 횟수", horizontal=True)
 # 막대 차트 : st.altair_chart()
-container.altair_chart(chart, use_container_width=True)
+st.altair_chart(chart, use_container_width=True)
 
 # 우승 횟수 막대 그래프
 #expander = container.expander("우승", expanded=True)
@@ -274,42 +276,42 @@ st.markdown("<h5></h5>", unsafe_allow_html=True)
 
 #---------------------------------------------------------------------------
 # 보드게임
-cols = st.columns(2)
+# 게임 횟수, 최근 플레이 date, 각 유저 우승 현황, 각 유저 평균 점수, 각 유저 최고 점수
 for index in range(len(st.session_state.boardgame_dic)):
-    with cols[index % 2]:
-        boardgame_name = st.session_state.boardgame_play_count_sorted_keys[index]
+    boardgame_name = st.session_state.boardgame_play_count_sorted_keys[index]
 
-        container = st.container(border=True)
-        container.markdown(f"<h4 style='color:rgba(240, 240, 230, 1.0); font-weight:bold;'>{index+1}. {boardgame_name}</h4>", unsafe_allow_html=True)
-        # 구분선 추가
-        container.markdown("<hr style='border: 2px solid rgba(255, 100, 100, 1.0); margin-top: 2px; margin-bottom: 40px;'>", unsafe_allow_html=True)
-
-        # 이미지를 가운데 정렬하기 위한 무식한 방법
-        header = container.columns([1,0.3])
-        # URL로 직접 이미지 표시
-        icon_url = st.session_state.boardgame_dic[boardgame_name]["icon_url"]
-        resized_img = load_and_resize_image(icon_url)
-        header[0].image(resized_img)
-        play_count = st.session_state.boardgame_dic[boardgame_name]['play_count']
-        header[1].markdown(f"<h4>{play_count} 회</h4>", unsafe_allow_html=True)
-        #container.image(resized_img)        
-
+    container = st.container(border=True)
+    container.markdown(f"<h4 style='color:rgba(230, 230, 230, 1.0); font-weight:bold;'>{index+1}. {boardgame_name}</h4>", unsafe_allow_html=True)
+    # 구분선 추가
+    container.markdown("<hr style='border: 2px solid rgba(255, 100, 100, 0.3); margin-top: 2px; margin-bottom: 40px;'>", unsafe_allow_html=True)
+    
+    # 이미지를 가운데 정렬하기 위한 무식한 방법
+    header = container.columns([1,1])
+    # URL로 직접 이미지 표시
+    icon_url = st.session_state.boardgame_dic[boardgame_name]["icon_url"]
+    resized_img = load_and_resize_image(icon_url)
+    header[0].image(resized_img)
+    play_count = st.session_state.boardgame_dic[boardgame_name]['play_count']
+    header[1].markdown(f"<h4>{play_count} 회</h4>", unsafe_allow_html=True)
+      
 #---------------------------------------------------------------------------
 # 보드게임
-# 게임 횟수, 최근 플레이 date, 각 유저 우승 현황, 각 유저 평균 점수, 각 유저 최고 점수
+#cols = st.columns(2)
 #for index in range(len(st.session_state.boardgame_dic)):
-#    boardgame_name = st.session_state.boardgame_play_count_sorted_keys[index]
+#    with cols[index % 2]:
+#        boardgame_name = st.session_state.boardgame_play_count_sorted_keys[index]
 
-#    container = st.container(border=True)
-#    container.markdown(f"<h7 style='color:rgba(230, 230, 230, 1.0); font-weight:bold;'>{index+1}. {boardgame_name}</h7>", unsafe_allow_html=True)
-    # 구분선 추가
-#    container.markdown("<hr style='border: 2px solid rgba(255, 100, 100, 0.3); margin-top: 2px; margin-bottom: 40px;'>", unsafe_allow_html=True)
+#        container = st.container(border=True)
+#        container.markdown(f"<h4 style='color:rgba(240, 240, 230, 1.0); font-weight:bold;'>{index+1}. {boardgame_name}</h4>", unsafe_allow_html=True)
+        # 구분선 추가
+#        container.markdown("<hr style='border: 2px solid rgba(255, 100, 100, 1.0); margin-top: 2px; margin-bottom: 40px;'>", unsafe_allow_html=True)
 
-    # 이미지를 가운데 정렬하기 위한 무식한 방법
-    #header = container.columns([0.5,1])
-    #header[0].markdown(f"<h2></h2>", unsafe_allow_html=True)
-    # URL로 직접 이미지 표시
-#    icon_url = st.session_state.boardgame_dic[boardgame_name]["icon_url"]
-#    resized_img = load_and_resize_image(icon_url)
-    #header[1].image(resized_img)
-#    container.image(resized_img) 
+        # 이미지를 가운데 정렬하기 위한 무식한 방법
+#        header = container.columns([1,0.3])
+        # URL로 직접 이미지 표시
+#        icon_url = st.session_state.boardgame_dic[boardgame_name]["icon_url"]
+#        resized_img = load_and_resize_image(icon_url)
+#        header[0].image(resized_img)
+#        play_count = st.session_state.boardgame_dic[boardgame_name]['play_count']
+#        header[1].markdown(f"<h4>{play_count} 회</h4>", unsafe_allow_html=True)
+        #container.image(resized_img)        
