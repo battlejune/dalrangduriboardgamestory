@@ -5,7 +5,7 @@ import requests
 from PIL import Image
 from io import BytesIO
 import altair as alt
-
+import random
 
 google_sheet_url = "https://docs.google.com/spreadsheets/d/1fDa292afd2TWIZtvNZl3R2tk2XMq1RGaC4o_pRCOUJE/edit?usp=sharing"
 
@@ -116,7 +116,7 @@ def parse_csvfile():
         return boardgame_dic     
 
 #---------------------------------------------------------------------------
-def load_and_resize_image(url, size=(200, 200), quality='high'):
+def load_and_resize_image(url, size=(150, 150), quality='high'):
     try:
         response = requests.get(url)
         img = Image.open(BytesIO(response.content))
@@ -194,7 +194,8 @@ def calculate_total_top_play_game(boardgame_dict):
     return top_play_boardgame_name, top_play_count
 
 #---------------------------------------------------------------------------
-st.title('달랑두리의 보드게임 이야기')
+#st.title('달랑두리의 보드게임 이야기')
+st.markdown(f"<h3 style='color:white;'>달랑두리의 보드게임 이야기</h3>", unsafe_allow_html=True)
 # 여백
 st.markdown("<h3></h3>", unsafe_allow_html=True)
 
@@ -226,8 +227,8 @@ resized_img = load_and_resize_image(icon_url)
 st.image(resized_img)
 header = st.columns([1, 0.6])
 # 보드게임 이름
-header[0].markdown(f"<h1 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{top_play_boardgame_name}</h1>", unsafe_allow_html=True)
-header[1].markdown(f"<h2 style='color:rgba(210, 210, 210, 1.0); border: 2px; margin-top: 5px; margin-bottom: 0px;'>{top_play_count} 회</h2>", unsafe_allow_html=True)
+header[0].markdown(f"<h3 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{top_play_boardgame_name}</h3>", unsafe_allow_html=True)
+header[1].markdown(f"<h5 style='color:rgba(210, 210, 210, 1.0); border: 2px; margin-top: 5px; margin-bottom: 0px;'>{top_play_count} 회</h5>", unsafe_allow_html=True)
 
 # 여백
 st.markdown("<h4></h4>", unsafe_allow_html=True)
@@ -237,11 +238,11 @@ st.markdown(f"<h6 style='color:gray;'>챔피언</h6>", unsafe_allow_html=True)
 # 구분선 추가
 st.markdown("<hr style='border: 0.5px solid rgba(210, 210, 210, 0.5); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
 header = st.columns([1, 0.6])
-header[0].markdown(f"<h1 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{str_winner_users}</h1>", unsafe_allow_html=True)
-header[1].markdown(f"<h2 style='color:rgba(210, 210, 210, 1.0); border: 2px; margin-top: 5px; margin-bottom: 0px;'>{winner_count} 회</h2>", unsafe_allow_html=True)
+header[0].markdown(f"<h3 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{str_winner_users}</h3>", unsafe_allow_html=True)
+header[1].markdown(f"<h5 style='color:rgba(210, 210, 210, 1.0); border: 2px; margin-top: 5px; margin-bottom: 0px;'>{winner_count} 회</h5>", unsafe_allow_html=True)
 
 # 여백
-st.markdown("<h5></h5>", unsafe_allow_html=True)
+st.markdown("<h3></h3>", unsafe_allow_html=True)
 
 # 우승 횟수 막대 그래프
 total_winner_count = calculate_total_winner_count(st.session_state.boardgame_dic)
@@ -250,29 +251,17 @@ data = pd.DataFrame({' ':str_family_name_list, '우승 횟수':total_winner_coun
 # Altair 차트 설정 (x축에 따른 그룹화 및 y축 정수 표시)
 # axis=alt.Axis(format='d') : 정수로 표시하도록 설정
 # x 값에 따라 색상 지정
-chart = alt.Chart(data).mark_bar().encode(x=alt.X('우승 횟수', axis=alt.Axis(format='d')), y=alt.Y(' ', sort=None), color=' :N'  )
-# 막대 차트 : st.bar_chart()
-#st.bar_chart(chart, x=" ", y="우승 횟수", horizontal=True)
+#chart = alt.Chart(data).mark_bar().encode(x=alt.X('우승 횟수', axis=alt.Axis(format='d')), y=alt.Y(' ', sort=None), color=' :N'  )
+chart = alt.Chart(data).mark_bar().encode(x=alt.X(' ', sort=None), y=alt.Y('우승 횟수', axis=alt.Axis(format='d')), color=' :N'  )
 # 막대 차트 : st.altair_chart()
 st.altair_chart(chart, use_container_width=True)
-
-# 우승 횟수 막대 그래프
-#expander = container.expander("우승", expanded=True)
-#total_winner_count = calculate_total_winner_count(st.session_state.boardgame_dic)
-# 데이터 생성
-#data = pd.DataFrame({' ':str_family_name_list, '우승 횟수':total_winner_count})
-# Altair 차트 설정 (x축에 따른 그룹화 및 y축 정수 표시)
-# axis=alt.Axis(format='d') : 정수로 표시하도록 설정
-# x 값에 따라 색상 지정
-#chart = alt.Chart(data).mark_bar().encode(x=alt.X('우승 횟수', axis=alt.Axis(format='d')), y=alt.Y(' ', sort=None), color=' :N'  )
 # 막대 차트 : st.bar_chart()
-#expander.bar_chart(source, x=" ", y="우승 횟수", horizontal=True)
-# 막대 차트 : st.altair_chart()
-#expander.altair_chart(chart, use_container_width=True)
+#data['name'] = pd.Categorical(data['name'], categories=data['name'].tolist(), ordered=True)
+#st.bar_chart(data, x="name", y="우승 횟수", horizontal=False)
 
 #---------------------------------------------------------------------------
 # 여백
-st.markdown("<h5></h5>", unsafe_allow_html=True)
+st.markdown("<h3></h3>", unsafe_allow_html=True)
 
 #---------------------------------------------------------------------------
 # 보드게임
@@ -292,7 +281,7 @@ for index in range(len(st.session_state.boardgame_dic)):
     resized_img = load_and_resize_image(icon_url)
     header[0].image(resized_img)
     play_count = st.session_state.boardgame_dic[boardgame_name]['play_count']
-    header[1].markdown(f"<h4>{play_count} 회</h4>", unsafe_allow_html=True)
+    header[1].markdown(f"<h5>{play_count} 회</h5>", unsafe_allow_html=True)
       
 #---------------------------------------------------------------------------
 # 보드게임
