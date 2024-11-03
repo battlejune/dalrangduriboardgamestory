@@ -281,6 +281,22 @@ for index in range(len(st.session_state.boardgame_dic)):
     # 횟수
     play_count = st.session_state.boardgame_dic[boardgame_name]['play_count']
     container.markdown(f"<h5>{play_count} 회</h5>", unsafe_allow_html=True)
+    
+    tab1, tab2, tab3 = container.tabs(["우승 횟수", "최고 점수", "평균 점수"])
+
+    with tab1:
+        st.header("A cat")
+    with tab2:
+        st.header("A dog")
+    with tab3:
+        st.header("An owl")
+    
+    # 각 유저 우승 횟수
+    list_winner = st.session_state.boardgame_dic[boardgame_name]['winner_count']
+    list_winner = {"이름":str_family_name_list,"횟수":list_winner}
+    df = pd.DataFrame(list_winner)
+    df.transpose()
+    container.dataframe(df.T)
       
 #---------------------------------------------------------------------------
 # 보드게임
