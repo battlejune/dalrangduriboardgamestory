@@ -87,9 +87,8 @@ def parse_csvfile():
             # 보드게임 이름으로 같은 key가 있으면 데이터만 갱신한다
             if boardgame_name in boardgame_dic.keys():
                 # loc: 레이블/조건 기반 (인덱스 이름, 열 이름)
-                list_scores = df.loc[index, ["score_1", "score_2", "score_3", "score_4"]].tolist()
-                list_scores, list_winner, list_nogame_count = winner_score_count(list_scores)
-            
+                scores = df.loc[index, ["score_1", "score_2", "score_3", "score_4"]].tolist()
+                list_scores, list_winner, list_nogame_count = winner_score_count(scores)
                 # 플레이 횟수 갱신
                 boardgame_dic[boardgame_name]['play_count'] += 1
                 for index in range(0, len(str_family_name_list)):
@@ -106,12 +105,12 @@ def parse_csvfile():
                 boardgame_dic[boardgame_name]["new_date"] = max(boardgame_dic[boardgame_name]["new_date"], df.loc[index, 'play_date'])  
             # 보드게임 이름으로 key생성하고 초기 데이터 생성한다
             else:
-                list_scores = df.loc[index, ["score_1", "score_2", "score_3", "score_4"]].tolist()
-                list_scores, list_winner, list_nogame_count = winner_score_count(list_scores)
+                scores = df.loc[index, ["score_1", "score_2", "score_3", "score_4"]].tolist()
+                list_scores, list_winner, list_nogame_count = winner_score_count(scores)
                 #new_date = df.loc[index, 'play_date']
                 new_date = df.iloc[index]['play_date']
                 icon_url = df.iloc[index]['icon_url']
-                boardgame_dic[boardgame_name] = {"play_count":1, "nogame_count":list_nogame_count, "winner_count":list_winner, "top_score":list_scores, "avg_score":list_scores, "new_date":new_date, "icon_url":icon_url}
+                boardgame_dic[boardgame_name] = {"play_count":1, "nogame_count":list_nogame_count, "winner_count":list_winner, "top_score":list_scores.copy(), "avg_score":list_scores.copy(), "new_date":new_date, "icon_url":icon_url}
 
         return boardgame_dic     
 
@@ -282,21 +281,64 @@ for index in range(len(st.session_state.boardgame_dic)):
     play_count = st.session_state.boardgame_dic[boardgame_name]['play_count']
     container.markdown(f"<h5>{play_count} 회</h5>", unsafe_allow_html=True)
     
+    # 탭 설정
     tab1, tab2, tab3 = container.tabs(["우승 횟수", "최고 점수", "평균 점수"])
-
+    # 우승 횟수
     with tab1:
-        st.header("A cat")
+        list_value = st.session_state.boardgame_dic[boardgame_name]['winner_count']
+        # 값을 오름차순했을때의 인덱스 리턴
+        list_sorted_value_index = [i for _, i in sorted([(x, i) for i, x in enumerate(list_value)], reverse=True)]
+        list_sorted_family_name = []
+        list_sorted_value = []
+        for index, value in enumerate(list_sorted_value_index):
+            list_sorted_family_name.append(str_family_name_list[value])
+            list_sorted_value.append(list_value[value])
+            
+        list_value_data = {"이름":list_sorted_family_name,"횟수":list_sorted_value}
+        df = pd.DataFrame(list_value_data)
+        # "T" 행렬 변환, "rename"는 행의 컬럼을 0이 아닌 1에서 오름차순 표시되도록 변환
+        st.dataframe(df.T.rename(columns=lambda x: x + 1))
+        
+    # 최고 점수
     with tab2:
-        st.header("A dog")
-    with tab3:
-        st.header("An owl")
+        list_value = st.session_state.boardgame_dic[boardgame_name]['top_score']
+        # 값을 오름차순했을때의 인덱스 리턴
+        list_sorted_value_index = [i for _, i in sorted([(x, i) for i, x in enumerate(list_value)], reverse=True)]
+        list_sorted_family_name = []
+        list_sorted_value = []
+        for index, value in enumerate(list_sorted_value_index):
+            list_sorted_family_name.append(str_family_name_list[value])
+            list_sorted_value.append(list_value[value])
+            
+        list_value_data = {"이름":list_sorted_family_name,"횟수":list_sorted_value}
+        df = pd.DataFrame(list_value_data)
+        # "T" 행렬 변환, "rename"는 행의 컬럼을 0이 아닌 1에서 오름차순 표시되도록 변환
+        st.dataframe(df.T.rename(columns=lambda x: x + 1))
     
-    # 각 유저 우승 횟수
-    list_winner = st.session_state.boardgame_dic[boardgame_name]['winner_count']
-    list_winner = {"이름":str_family_name_list,"횟수":list_winner}
-    df = pd.DataFrame(list_winner)
-    df.transpose()
-    container.dataframe(df.T)
+    # 평균 점수
+    with tab3:
+        play_count = st.session_state.boardgame_dic[boardgame_name]['play_count']
+        list_nogame_count = st.session_state.boardgame_dic[boardgame_name]['nogame_count']
+        list_play_count = [play_count - value for value in list_nogame_count]
+        list_value = st.session_state.boardgame_dic[boardgame_name]['avg_score']
+        list_avg_value = [int(list_value[i] / list_play_count[i]) for i in range(len(list_value))]
+        # 값을 오름차순했을때의 인덱스 리턴
+        list_sorted_value_index = [i for _, i in sorted([(x, i) for i, x in enumerate(list_avg_value)], reverse=True)]
+        list_sorted_family_name = []
+        list_sorted_value = []
+        for index, value in enumerate(list_sorted_value_index):
+            list_sorted_family_name.append(str_family_name_list[value])
+            list_sorted_value.append(list_avg_value[value])
+            
+        list_value_data = {"이름":list_sorted_family_name,"횟수":list_sorted_value}
+        df = pd.DataFrame(list_value_data)
+        # "T" 행렬 변환, "rename"는 행의 컬럼을 0이 아닌 1에서 오름차순 표시되도록 변환
+        st.dataframe(df.T.rename(columns=lambda x: x + 1))
+        #st.write(list_value)
+        #st.write(list_play_count)
+        #st.write(list_avg_value)
+
+
       
 #---------------------------------------------------------------------------
 # 보드게임
