@@ -110,6 +110,7 @@ def parse_csvfile():
                 #new_date = df.loc[index, 'play_date']
                 new_date = df.iloc[index]['play_date']
                 icon_url = df.iloc[index]['icon_url']
+                # !!!(주의) "top_score", "avg_score"는 list_scores.copy()를 이용한 값을 복사(깊은 복사) 한다 : {"top_score":list_scores}과 같이 할당(얕은 복사)을 하면 데이터가 공유되는 문제 발생
                 boardgame_dic[boardgame_name] = {"play_count":1, "nogame_count":list_nogame_count, "winner_count":list_winner, "top_score":list_scores.copy(), "avg_score":list_scores.copy(), "new_date":new_date, "icon_url":icon_url}
 
         return boardgame_dic     
@@ -220,13 +221,13 @@ container.markdown(f"<h6 style='color:gray;'>인기 게임</h6>", unsafe_allow_h
 # 구분선 추가
 container.markdown("<hr style='border: 0.5px solid rgba(210, 210, 210, 0.5); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
 # 보드게임 이름
-container.markdown(f"<h2 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{top_play_boardgame_name}</h2>", unsafe_allow_html=True)
+container.markdown(f"<h2 style='color:rgba(80, 80, 255, 0.8); font-weight:bold;'>{top_play_boardgame_name}</h2>", unsafe_allow_html=True)
 # URL로 직접 이미지 표시
 icon_url = st.session_state.boardgame_dic[top_play_boardgame_name]["icon_url"]
 resized_img = load_and_resize_image(icon_url)
 container.image(resized_img)
 # 횟수
-container.markdown(f"<h4 style='color:rgba(210, 210, 210, 1.0);'>{top_play_count} 회</h4>", unsafe_allow_html=True)
+container.markdown(f"<h4 style='color:gray;'>{top_play_count} 회</h4>", unsafe_allow_html=True)
 
 # 여백
 container.markdown("<h4></h4>", unsafe_allow_html=True)
@@ -236,9 +237,9 @@ container.markdown(f"<h6 style='color:gray;'>챔피언</h6>", unsafe_allow_html=
 # 구분선 추가
 container.markdown("<hr style='border: 0.5px solid rgba(210, 210, 210, 0.5); margin-top: 0px; margin-bottom: 0px;'>", unsafe_allow_html=True)
 # 챔피언 이름
-container.markdown(f"<h2 style='color:rgba(150, 150, 255, 1.0); font-weight:bold;'>{str_winner_users}</h2>", unsafe_allow_html=True)
+container.markdown(f"<h2 style='color:rgba(80, 80, 255, 0.8); font-weight:bold;'>{str_winner_users}</h2>", unsafe_allow_html=True)
 # 횟수
-container.markdown(f"<h4 style='color:rgba(210, 210, 210, 1.0); border: 2px; margin-top: 5px; margin-bottom: 0px;'>{winner_count} 회</h4>", unsafe_allow_html=True)
+container.markdown(f"<h4 style='color:gray; border: 2px; margin-top: 5px; margin-bottom: 0px;'>{winner_count} 회</h4>", unsafe_allow_html=True)
 
 # 여백
 container.markdown("<h3></h3>", unsafe_allow_html=True)
@@ -269,7 +270,7 @@ for index in range(len(st.session_state.boardgame_dic)):
     boardgame_name = st.session_state.boardgame_play_count_sorted_keys[index]
 
     container = st.container(border=True)
-    container.markdown(f"<h4 style='color:rgba(230, 230, 230, 1.0); font-weight:bold;'>{index+1}. {boardgame_name}</h4>", unsafe_allow_html=True)
+    container.markdown(f"<h4 style='font-weight:bold;'>{index+1}. {boardgame_name}</h4>", unsafe_allow_html=True)
     # 구분선 추가
     container.markdown("<hr style='border: 2px solid rgba(255, 100, 100, 0.3); margin-top: 2px; margin-bottom: 40px;'>", unsafe_allow_html=True)
     
@@ -296,6 +297,8 @@ for index in range(len(st.session_state.boardgame_dic)):
             
         list_value_data = {"이름":list_sorted_family_name,"횟수":list_sorted_value}
         df = pd.DataFrame(list_value_data)
+        df["이름"] = df["이름"].astype(str)  # 이름 컬럼을 문자열로 변환
+        df["횟수"] = df["횟수"].astype(int)  # 횟수 컬럼을 정수로 변환 
         # "T" 행렬 변환, "rename"는 행의 컬럼을 0이 아닌 1에서 오름차순 표시되도록 변환
         st.dataframe(df.T.rename(columns=lambda x: x + 1))
         
@@ -310,8 +313,10 @@ for index in range(len(st.session_state.boardgame_dic)):
             list_sorted_family_name.append(str_family_name_list[value])
             list_sorted_value.append(list_value[value])
             
-        list_value_data = {"이름":list_sorted_family_name,"횟수":list_sorted_value}
+        list_value_data = {"이름":list_sorted_family_name,"점수":list_sorted_value}
         df = pd.DataFrame(list_value_data)
+        df["이름"] = df["이름"].astype(str)  # 이름 컬럼을 문자열로 변환
+        df["점수"] = df["점수"].astype(int)  # 횟수 컬럼을 정수로 변환
         # "T" 행렬 변환, "rename"는 행의 컬럼을 0이 아닌 1에서 오름차순 표시되도록 변환
         st.dataframe(df.T.rename(columns=lambda x: x + 1))
     
@@ -321,7 +326,7 @@ for index in range(len(st.session_state.boardgame_dic)):
         list_nogame_count = st.session_state.boardgame_dic[boardgame_name]['nogame_count']
         list_play_count = [play_count - value for value in list_nogame_count]
         list_value = st.session_state.boardgame_dic[boardgame_name]['avg_score']
-        list_avg_value = [int(list_value[i] / list_play_count[i]) for i in range(len(list_value))]
+        list_avg_value = [list_value[i] / list_play_count[i] for i in range(len(list_value))]
         # 값을 오름차순했을때의 인덱스 리턴
         list_sorted_value_index = [i for _, i in sorted([(x, i) for i, x in enumerate(list_avg_value)], reverse=True)]
         list_sorted_family_name = []
@@ -330,14 +335,12 @@ for index in range(len(st.session_state.boardgame_dic)):
             list_sorted_family_name.append(str_family_name_list[value])
             list_sorted_value.append(list_avg_value[value])
             
-        list_value_data = {"이름":list_sorted_family_name,"횟수":list_sorted_value}
+        list_value_data = {"이름":list_sorted_family_name,"점수":list_sorted_value}
         df = pd.DataFrame(list_value_data)
+        df["이름"] = df["이름"].astype(str)  # 이름 컬럼을 문자열로 변환
+        df["점수"] = df["점수"].astype(int)  # 횟수 컬럼을 정수로 변환        
         # "T" 행렬 변환, "rename"는 행의 컬럼을 0이 아닌 1에서 오름차순 표시되도록 변환
         st.dataframe(df.T.rename(columns=lambda x: x + 1))
-        #st.write(list_value)
-        #st.write(list_play_count)
-        #st.write(list_avg_value)
-
 
       
 #---------------------------------------------------------------------------
